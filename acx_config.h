@@ -46,7 +46,8 @@
 
 /* assume 32bit I/O width
  * (16bit is also compatible with Compact Flash) */
-#define ACX_IO_WIDTH 32
+/*#define ACX_IO_WIDTH 32*/
+#define ACX_IO_WIDTH 16
 
 /* Set this to 1 if you want monitor mode to use
  * phy header. Currently it is not useful anyway since we
