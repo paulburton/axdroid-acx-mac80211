@@ -5092,7 +5092,7 @@ static int __devinit acxmem_e_probe(struct platform_device *pdev) {
 	log(L_ANY, "acx: found an %s-based wireless network card, "
 			"irq:%d, "
 			"membase:0x%p, mem_size:%ld, "
-			"iobase:0x%p",
+			"iobase:0x%p\n",
 			chip_name,
 			adev->irq,
 			adev->membase, addr_size,
