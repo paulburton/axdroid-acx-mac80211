@@ -75,6 +75,9 @@ static int aximx50_wlan_stop(void)
 	aximx50_fpga_clear(0x1c, 0x0001);
 	gpio_set_value(GPIO_NR_AXIMX50_WIFI_RESET, 1);
 
+	gpio_free(GPIO_NR_AXIMX50_WIFI_IRQ);
+	gpio_free(GPIO_NR_AXIMX50_WIFI_RESET);
+
 	printk("aximx50_acx: %s: done\n", __func__);
 	return 0;
 }
@@ -106,12 +109,16 @@ static struct platform_device acx_device = {
 
 static int __init aximx50_wlan_init(void)
 {
-	int res;
+	int ret;
 
-	aximx50_wlan_start();
+	ret = aximx50_wlan_start();
+	if (ret) {
+		printk("aximx50_acx: %s: failed to start!\n", __func__);
+		return ret;
+	}
 
 	printk("aximx50_acx: %s: platform_device_register ... \n", __func__);
-	res=platform_device_register(&acx_device);
+	ret=platform_device_register(&acx_device);
 	printk("aximx50_acx: %s: platform_device_register: done\n", __func__);
 	// Check if the (or another) driver was found, aka if probe succeeded
 	if (acx_device.dev.driver == NULL) {
@@ -121,7 +128,7 @@ static int __init aximx50_wlan_init(void)
 		return(-EINVAL);
 	}
 
-	return res;
+	return ret;
 }
 
 
