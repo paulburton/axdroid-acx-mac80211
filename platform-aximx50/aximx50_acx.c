@@ -36,31 +36,33 @@ static int aximx50_wlan_start(void)
 	if (ret)
 		goto err2;
 
-	ret = gpio_request(GPIO_NR_AXIMX50_WIFI_IRQ, "WIFI IRQ");
+	ret = gpio_request(GPIO_NR_AXIMX50_WIFI_RDY, "WIFI RDY");
 	if (ret)
 		goto err2;
-	ret = gpio_direction_input(GPIO_NR_AXIMX50_WIFI_IRQ);
+	ret = gpio_direction_input(GPIO_NR_AXIMX50_WIFI_RDY);
 	if (ret)
 		goto err3;
 
 	gpio_set_value(GPIO_NR_AXIMX50_WIFI_RESET, 1);
-	mdelay(50);
+	udelay(100);
+	aximx50_fpga_set(0x00, 0x0040);
+	udelay(1000);
 	aximx50_fpga_set(0x1c, 0x0001);
 	mdelay(50);
 	aximx50_fpga_set(0x16, 0x0004);
-	mdelay(50);
+	udelay(1000);
 	aximx50_fpga_set(0x10, 0x2000);
+	udelay(1000);
 	aximx50_fpga_set(0x10, 0x0008);
 	mdelay(100);
 	gpio_set_value(GPIO_NR_AXIMX50_WIFI_RESET, 0);
-	mdelay(50);
-	aximx50_fpga_set(0x00, 0x0040);
+	udelay(1000);
 
 	printk("aximx50_acx: %s: done\n", __func__);
 	return 0;
 
 err3:
-	gpio_free(GPIO_NR_AXIMX50_WIFI_IRQ);
+	gpio_free(GPIO_NR_AXIMX50_WIFI_RDY);
 err2:
 	gpio_free(GPIO_NR_AXIMX50_WIFI_RESET);
 err1:
@@ -69,13 +71,15 @@ err1:
 
 static int aximx50_wlan_stop(void)
 {
+	aximx50_fpga_set(0x00, 0x0040);
+	udelay(1000);
 	aximx50_fpga_clear(0x10, 0x0008);
 	aximx50_fpga_clear(0x10, 0x2000);
 	aximx50_fpga_clear(0x16, 0x0004);
 	aximx50_fpga_clear(0x1c, 0x0001);
 	gpio_set_value(GPIO_NR_AXIMX50_WIFI_RESET, 1);
 
-	gpio_free(GPIO_NR_AXIMX50_WIFI_IRQ);
+	gpio_free(GPIO_NR_AXIMX50_WIFI_RDY);
 	gpio_free(GPIO_NR_AXIMX50_WIFI_RESET);
 
 	printk("aximx50_acx: %s: done\n", __func__);
@@ -92,8 +96,8 @@ static struct resource acx_resources[] = {
 		.flags	= IORESOURCE_MEM,
 	},
 	[1] = {
-		.start	= gpio_to_irq(GPIO_NR_AXIMX50_WIFI_IRQ),
-		.end	= gpio_to_irq(GPIO_NR_AXIMX50_WIFI_IRQ),
+		.start	= gpio_to_irq(GPIO_NR_AXIMX50_WIFI_RDY),
+		.end	= gpio_to_irq(GPIO_NR_AXIMX50_WIFI_RDY),
 		.flags	= IORESOURCE_IRQ,
 	},
 };
